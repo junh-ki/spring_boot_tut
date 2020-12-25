@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,7 +36,16 @@ public class PersonDataAccessService implements PersonDao {
 
     @Override
     public Optional<Person> selectPersonById(UUID id) {
-        return Optional.empty();
+        final String sql = "SELECT id, name FROM person WHERE id = ?";
+        final Person person = jdbcTemplate.queryForObject(
+                sql,
+                new Object[]{id},
+                (resultSet, i) -> {
+                    final UUID personID = UUID.fromString(resultSet.getString("id"));
+                    final String name = resultSet.getString("name");
+                    return new Person(personID, name);
+                });
+        return Optional.ofNullable(person);
     }
 
     @Override
